@@ -78,9 +78,6 @@ HSIEventSender::send_raw_hsi_data(const std::array<uint32_t, 6>& raw_data)
                 << std::hex 
                 << "0x"   << payload.frame.version
                 << ", 0x"   << payload.frame.detector_id
-                << ", 0x"   << payload.frame.crate
-                << ", 0x"   << payload.frame.slot
-                << ", 0x"   << payload.frame.link
                 
                 << "; 0x"   << payload.frame.timestamp_low
                 << "; 0x"   << payload.frame.timestamp_high
