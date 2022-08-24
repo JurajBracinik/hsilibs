@@ -241,21 +241,17 @@ HSIReadout::do_hsievent_work(std::atomic<bool>& running_flag)
         TLOG_DEBUG(3) << get_name() << ": read out data: " << std::showbase << std::hex << header << ", " << ts
                       << ", " << data << ", " << std::bitset<32>(trigger) << ", "
                       << "ts: " << ts << "\n";
-          
-        dfmessages::HSIEvent event;
-          
+                  
         // In lieu of propper HSI channel to signal mapping, fake signal map when HSI firmware+hardware is in emulation mode.
         // TODO DAQ/HSI team 24/03/22 Put in place HSI channel to signal mapping.
 
         if (hsi_emulation_mode)
         {
           TLOG_DEBUG(3) << " HSI hardware is in emulation mode, faking (overwriting) signal map from firmware+hardware to have (only) bit 7 high.";
-          event = dfmessages::HSIEvent(hsi_device_id, 1UL << 7, ts, counter, m_run_number);
+          trigger = 1UL << 7;
         }
-        else
-        {
-          event = dfmessages::HSIEvent(hsi_device_id, trigger, ts, counter, m_run_number);
-        }
+        
+        dfmessages::HSIEvent event = dfmessages::HSIEvent(hsi_device_id, trigger, ts, counter, m_run_number);
           
         m_last_readout_timestamp.store(ts);
 
