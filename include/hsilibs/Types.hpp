@@ -13,7 +13,7 @@
 
 #include "detdataformats/hsi/TimingHSIFrame.hpp"
 #include "daqdataformats/FragmentHeader.hpp"
-#include "daqdataformats/GeoID.hpp"
+#include "daqdataformats/SourceID.hpp"
 
 #include <algorithm> // For std::min
 #include <cassert>   // For assert()
@@ -69,8 +69,9 @@ public:
 
   size_t get_frame_size() { return TIMING_HSI_FRAME_STRUCT_SIZE; }
 
-  static const constexpr daqdataformats::GeoID::SystemType system_type = daqdataformats::GeoID::SystemType::kHSI;
-  static const constexpr daqdataformats::FragmentType fragment_type = daqdataformats::FragmentType::kHSIData;
+  static const constexpr daqdataformats::SourceID::Subsystem subsystem =
+    daqdataformats::SourceID::Subsystem::kHwSignalsInterface;
+  static const constexpr daqdataformats::FragmentType fragment_type = daqdataformats::FragmentType::kHardwareSignal;
   static const constexpr uint64_t expected_tick_difference = 0; // NOLINT(build/unsigned)
 };
 
