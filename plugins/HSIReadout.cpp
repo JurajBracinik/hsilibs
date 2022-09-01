@@ -13,6 +13,7 @@
 
 #include "timinglibs/TimingIssues.hpp"
 #include "timing/TimingIssues.hpp"
+#include "timing/HSIDesignInterface.hpp"
 
 #include "appfwk/DAQModuleHelper.hpp"
 #include "appfwk/app/Nljs.hpp"
@@ -162,20 +163,21 @@ HSIReadout::do_hsievent_work(std::atomic<bool>& running_flag)
   m_last_readout_timestamp = 0;
   m_last_sent_timestamp = 0;
 
+  auto hsi_design = dynamic_cast<const timing::HSIDesignInterface*> (&m_hsi_device->getNode(""));
+  auto hsi_node = hsi_design->get_hsi_node();
+  auto ept_node = hsi_design->get_endpoint_node_plain(0);
+
   while (running_flag.load()) {
-    
-    auto hsi_node = m_hsi_device->getNode<timing::HSINode>("endpoint0");
-    
+        
     // endpoint should be ready if already running
-    auto hsi_endpoint_ready = hsi_node.endpoint_ready();
+    auto hsi_endpoint_ready = ept_node->endpoint_ready();
     if (!hsi_endpoint_ready)
     {
-      auto hsi_endpoint_state = hsi_node.read_endpoint_state();
+      auto hsi_endpoint_state = ept_node->read_endpoint_state();
       throw timing::EndpointNotReady(ERS_HERE, "HSI", hsi_endpoint_state);
     }
     
-    auto hsi_emulation_mode = hsi_node.getNode("hsi.csr.ctrl.src").read();
-    m_hsi_device->dispatch();
+    auto hsi_emulation_mode = hsi_node.read_signal_source_mode();
 
     uhal::ValVector<uint32_t> hsi_words;
     try

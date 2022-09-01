@@ -15,8 +15,8 @@
 #include "timinglibs/timingcmd/Nljs.hpp"
 #include "timinglibs/timingcmd/Structs.hpp"
 
-#include "timing/timingfirmwareinfo/InfoNljs.hpp"
-#include "timing/timingfirmwareinfo/InfoStructs.hpp"
+#include "timing/timingendpointinfo/InfoNljs.hpp"
+#include "timing/timingendpointinfo/InfoStructs.hpp"
 
 #include "opmonlib/JSONTags.hpp"
 #include "appfwk/DAQModuleHelper.hpp"
@@ -273,17 +273,17 @@ HSIController::get_info(opmonlib::InfoCollector& ci, int /*level*/)
 void
 HSIController::process_device_info(nlohmann::json info)
 {
-  timing::timingfirmwareinfo::HSIFirmwareMonitorData hsi_info;
+  timing::timingendpointinfo::TimingEndpointInfo endpoint_info;
 
-  auto hsi_data = info[opmonlib::JSONTags::children]["hsi"][opmonlib::JSONTags::properties][hsi_info.info_type][opmonlib::JSONTags::data];
+  auto endpoint_data = info[opmonlib::JSONTags::children]["endpoint"][opmonlib::JSONTags::properties][endpoint_info.info_type][opmonlib::JSONTags::data];
 
-  from_json(hsi_data, hsi_info);
+  from_json(endpoint_data, endpoint_info);
 
-  m_endpoint_state = hsi_info.endpoint_state;
+  m_endpoint_state = endpoint_info.state;
   
   TLOG_DEBUG(3) << "HSI ept state: 0x" << std::hex << m_endpoint_state;
 
-  if (hsi_info.endpoint_state == 0x8)
+  if (m_endpoint_state == 0x8)
   {
     if (!m_device_ready)
     {
