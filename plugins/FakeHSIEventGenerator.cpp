@@ -235,15 +235,11 @@ FakeHSIEventGenerator::do_hsievent_work(std::atomic<bool>& running_flag)
   m_last_sent_timestamp = 0;
   m_failed_to_send_counter = 0;
 
-  while (running_flag.load()) {
+  bool break_flag = false;
 
-    // sleep for the configured event period, if trigger ticks are not 0, otherwise do not send anything
-    if (m_active_trigger_rate.load() > 0) {
-      std::this_thread::sleep_for(std::chrono::microseconds(m_event_period.load()));
-    } else {
-      std::this_thread::sleep_for(std::chrono::microseconds(250000));
-      continue;
-    }
+  auto prev_gen_time = std::chrono::steady_clock::now();
+
+  while (!break_flag) {
 
     // emulate some signals
     uint32_t signal_map = generate_signal_map(); // NOLINT(build/unsigned)
@@ -286,7 +282,37 @@ FakeHSIEventGenerator::do_hsievent_work(std::atomic<bool>& running_flag)
 
       send_raw_hsi_data(hsi_struct);
 
+    }
+
+    // sleep for the configured event period, if trigger ticks are not 0, otherwise do not send anything
+    if (m_active_trigger_rate.load() > 0)
+    {
+      auto next_gen_time = prev_gen_time + std::chrono::microseconds(m_event_period.load());
+
+      // check running_flag periodically
+      auto flag_check_period = std::chrono::milliseconds(1);
+      auto next_flag_check_time = prev_gen_time + flag_check_period;
+
+      while (next_gen_time > next_flag_check_time + flag_check_period)
+      {
+        if (!running_flag.load())
+        {
+          TLOG_DEBUG(0) << "while waiting to generate fake hsi event, negative run gatherer flag detected.";
+          break_flag = true;
+          break;
+        }
+        std::this_thread::sleep_until(next_flag_check_time);
+        next_flag_check_time = next_flag_check_time + flag_check_period;
+      }
+      if (break_flag == false)
+      {
+        std::this_thread::sleep_until(next_gen_time);
+      }
+
+      prev_gen_time = next_gen_time;
+
     } else {
+      std::this_thread::sleep_for(std::chrono::microseconds(250000));
       continue;
     }
   }
