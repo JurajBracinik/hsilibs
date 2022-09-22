@@ -236,7 +236,9 @@ FakeHSIEventGenerator::do_hsievent_work(std::atomic<bool>& running_flag)
   m_failed_to_send_counter = 0;
 
   bool break_flag = false;
-  
+
+  auto prev_gen_time = std::chrono::steady_clock::now();
+
   while (!break_flag) {
 
     // emulate some signals
@@ -280,14 +282,11 @@ FakeHSIEventGenerator::do_hsievent_work(std::atomic<bool>& running_flag)
 
       send_raw_hsi_data(hsi_struct);
 
-    } else {
-      continue;
     }
 
     // sleep for the configured event period, if trigger ticks are not 0, otherwise do not send anything
     if (m_active_trigger_rate.load() > 0)
     {
-      auto prev_gen_time = std::chrono::steady_clock::now();
       auto next_gen_time = prev_gen_time + std::chrono::microseconds(m_event_period.load());
 
       // check running_flag periodically
@@ -309,6 +308,9 @@ FakeHSIEventGenerator::do_hsievent_work(std::atomic<bool>& running_flag)
       {
         std::this_thread::sleep_until(next_gen_time);
       }
+
+      prev_gen_time = next_gen_time;
+
     } else {
       std::this_thread::sleep_for(std::chrono::microseconds(250000));
       continue;
