@@ -36,7 +36,8 @@ namespace hsilibs {
 
 HSIController::HSIController(const std::string& name)
   : dunedaq::timinglibs::TimingController(name, 9) // 2nd arg: how many hw commands can this module send?
-  , m_clock_frequency(50e6)
+  , m_clock_frequency(62.5e6)
+  , m_endpoint_state(0)
 {
   register_command("conf", &HSIController::do_configure);
   register_command("start", &HSIController::do_start);
@@ -69,15 +70,23 @@ HSIController::do_configure(const nlohmann::json& data)
   do_hsi_configure(data);
 
   auto time_of_conf = std::chrono::high_resolution_clock::now();
-  while (!m_device_ready)
+  while (true)
   {
     auto now = std::chrono::high_resolution_clock::now();
     auto ms_since_conf = std::chrono::duration_cast<std::chrono::milliseconds>(now - time_of_conf);
     
+    TLOG_DEBUG(3) << "HSI endpoint (" << m_timing_device << ") state: " << m_endpoint_state << ", infos received: " << m_device_infos_received_count;
+
+    if (m_device_ready && m_device_infos_received_count)
+    {
+      break;
+    }
+
     if (ms_since_conf > m_device_ready_timeout)
     {
       throw timinglibs::TimingEndpointNotReady(ERS_HERE,"HSI ("+m_timing_device+")", m_endpoint_state);
     }
+    
     TLOG_DEBUG(3) << "Waiting for HSI endpoint to become ready for (ms) " << ms_since_conf.count();
     std::this_thread::sleep_for(std::chrono::microseconds(250000));
   }
@@ -111,6 +120,13 @@ void
 HSIController::do_stop(const nlohmann::json& data)
 {
   do_hsi_stop(data);
+}
+
+void
+HSIController::do_scrap(const nlohmann::json& data)
+{
+  m_endpoint_state = 0x0;
+  TimingController::do_scrap(data);
 }
 
 void
@@ -273,6 +289,8 @@ HSIController::get_info(opmonlib::InfoCollector& ci, int /*level*/)
 void
 HSIController::process_device_info(nlohmann::json info)
 {
+  ++m_device_infos_received_count;
+
   timing::timingendpointinfo::TimingEndpointInfo endpoint_info;
 
   auto endpoint_data = info[opmonlib::JSONTags::children]["endpoint"][opmonlib::JSONTags::properties][endpoint_info.info_type][opmonlib::JSONTags::data];
@@ -281,7 +299,7 @@ HSIController::process_device_info(nlohmann::json info)
 
   m_endpoint_state = endpoint_info.state;
   
-  TLOG_DEBUG(3) << "HSI ept state: 0x" << std::hex << m_endpoint_state;
+  TLOG_DEBUG(3) << "HSI ept state: 0x" << std::hex << m_endpoint_state << std::dec << ", infos received: " << m_device_infos_received_count;
 
   if (m_endpoint_state == 0x8)
   {
@@ -299,7 +317,6 @@ HSIController::process_device_info(nlohmann::json info)
       TLOG_DEBUG(2) << "HSI endpoint no longer ready";
     }
   }
-  ++m_device_infos_received_count;
 }
 } // namespace hsilibs
 } // namespace dunedaq

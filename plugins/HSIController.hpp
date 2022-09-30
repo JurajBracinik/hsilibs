@@ -58,6 +58,7 @@ private:
   void do_configure(const nlohmann::json& data) override;
   void do_start(const nlohmann::json& data) override;
   void do_stop(const nlohmann::json& data) override;
+  void do_scrap(const nlohmann::json& data) override;
   void do_change_rate(const nlohmann::json& data);
 
   timinglibs::timingcmd::TimingHwCmd construct_hsi_hw_cmd(const std::string& cmd_id);
@@ -65,7 +66,7 @@ private:
   // timinglibs hsi commands
   void do_hsi_io_reset(const nlohmann::json& data);
   void do_hsi_endpoint_enable(const nlohmann::json& data);
-  void do_hsi_endpoint_disable(const nlohmann::json&);
+  void do_hsi_endpoint_disable(const nlohmann::json& data);
   void do_hsi_endpoint_reset(const nlohmann::json& data);
 
   void do_hsi_reset(const nlohmann::json&);
