@@ -174,7 +174,7 @@ HSIReadout::do_hsievent_work(std::atomic<bool>& running_flag)
     if (!hsi_endpoint_ready)
     {
       auto hsi_endpoint_state = ept_node->read_endpoint_state();
-      throw timing::EndpointNotReady(ERS_HERE, "HSI", hsi_endpoint_state);
+      ers::error(timing::EndpointNotReady(ERS_HERE, "HSI", hsi_endpoint_state));
     }
     
     auto hsi_emulation_mode = hsi_node.read_signal_source_mode();
