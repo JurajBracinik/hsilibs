@@ -64,6 +64,8 @@ private:
   void do_stop(const nlohmann::json& obj) override;
   void do_scrap(const nlohmann::json& obj) override;
 
+  std::shared_ptr<raw_sender_ct> m_raw_hsi_data_sender;
+  
   // Configuration
   std::string m_hsi_device_name;
   uint m_readout_period; // NOLINT(build/unsigned)
