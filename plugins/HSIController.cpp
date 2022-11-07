@@ -36,8 +36,8 @@ namespace hsilibs {
 
 HSIController::HSIController(const std::string& name)
   : dunedaq::timinglibs::TimingController(name, 9) // 2nd arg: how many hw commands can this module send?
-  , m_clock_frequency(62.5e6)
   , m_endpoint_state(0)
+  , m_clock_frequency(62.5e6)
 {
   register_command("conf", &HSIController::do_configure);
   register_command("start", &HSIController::do_start);
