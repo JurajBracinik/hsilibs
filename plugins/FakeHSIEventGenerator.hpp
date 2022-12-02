@@ -70,7 +70,6 @@ private:
   void do_hsievent_work(std::atomic<bool>&) override;
 
   // Configuration
-  std::string m_timesync_topic;
   std::atomic<daqdataformats::run_number_t> m_run_number;
 
   // Helper class for estimating DAQ time
