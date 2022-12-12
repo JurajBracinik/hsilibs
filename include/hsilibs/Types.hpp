@@ -11,9 +11,9 @@
 #ifndef HSILIBS_INCLUDE_HSILIBS_TYPES_HPP_
 #define HSILIBS_INCLUDE_HSILIBS_TYPES_HPP_
 
-#include "detdataformats/hsi/TimingHSIFrame.hpp"
 #include "daqdataformats/FragmentHeader.hpp"
 #include "daqdataformats/SourceID.hpp"
+#include "detdataformats/hsi/TimingHSIFrame.hpp"
 #include "serialization/Serialization.hpp"
 
 #include <algorithm> // For std::min
@@ -36,7 +36,7 @@ class TIMING_HSI_FRAME_STRUCT
 {
 public:
   using FrameType = TIMING_HSI_FRAME_STRUCT;
-  
+
   dunedaq::detdataformats::hsi::TimingHSIFrame frame;
 
   // comparable based on start timestamp
@@ -44,7 +44,7 @@ public:
   {
     return this->get_first_timestamp() < other.get_first_timestamp() ? true : false;
   }
-  
+
   uint64_t get_timestamp() const // NOLINT(build/unsigned)
   {
     return frame.get_timestamp(); // NOLINT
