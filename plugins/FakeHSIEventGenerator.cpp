@@ -108,7 +108,6 @@ FakeHSIEventGenerator::do_configure(const nlohmann::json& obj)
   m_signal_emulation_mode = params.signal_emulation_mode;
   m_mean_signal_multiplicity = params.mean_signal_multiplicity;
   m_enabled_signals = params.enabled_signals;
-  m_timesync_topic = params.timesync_topic;
 
   // configure the random distributions
   m_poisson_distribution = std::poisson_distribution<uint64_t>(m_mean_signal_multiplicity); // NOLINT(build/unsigned)
@@ -124,7 +123,7 @@ FakeHSIEventGenerator::do_start(const nlohmann::json& obj)
 
   m_received_timesync_count.store(0);
 
-  m_timesync_receiver = get_iom_receiver<dfmessages::TimeSync>(m_timesync_topic);
+  m_timesync_receiver = get_iom_receiver<dfmessages::TimeSync>(".*");
   m_timesync_receiver->add_callback(std::bind(&FakeHSIEventGenerator::dispatch_timesync, this, std::placeholders::_1));
 
   auto start_params = obj.get<rcif::cmd::StartParams>();
