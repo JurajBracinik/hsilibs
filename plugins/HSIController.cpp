@@ -18,11 +18,11 @@
 #include "timing/timingendpointinfo/InfoNljs.hpp"
 #include "timing/timingendpointinfo/InfoStructs.hpp"
 
-#include "opmonlib/JSONTags.hpp"
 #include "appfwk/DAQModuleHelper.hpp"
 #include "appfwk/cmd/Nljs.hpp"
 #include "ers/Issue.hpp"
 #include "logging/Logging.hpp"
+#include "opmonlib/JSONTags.hpp"
 #include "rcif/cmd/Nljs.hpp"
 
 #include <chrono>
@@ -44,7 +44,7 @@ HSIController::HSIController(const std::string& name)
   register_command("stop_trigger_sources", &HSIController::do_stop);
   register_command("change_rate", &HSIController::do_change_rate);
   register_command("scrap", &HSIController::do_scrap);
-  
+
   // timing endpoint hardware commands
   register_command("hsi_io_reset", &HSIController::do_hsi_io_reset);
   register_command("hsi_endpoint_enable", &HSIController::do_hsi_endpoint_enable);
@@ -62,7 +62,7 @@ HSIController::do_configure(const nlohmann::json& data)
 {
   m_hsi_configuration = data.get<hsicontroller::ConfParams>();
   m_timing_device = m_hsi_configuration.device;
-  
+
   TimingController::do_configure(data); // configure hw command connection
 
   do_hsi_reset(data);
@@ -70,23 +70,21 @@ HSIController::do_configure(const nlohmann::json& data)
   do_hsi_configure(data);
 
   auto time_of_conf = std::chrono::high_resolution_clock::now();
-  while (true)
-  {
+  while (true) {
     auto now = std::chrono::high_resolution_clock::now();
     auto ms_since_conf = std::chrono::duration_cast<std::chrono::milliseconds>(now - time_of_conf);
-    
-    TLOG_DEBUG(3) << "HSI endpoint (" << m_timing_device << ") state: " << m_endpoint_state << ", infos received: " << m_device_infos_received_count;
 
-    if (m_device_ready && m_device_infos_received_count)
-    {
+    TLOG_DEBUG(3) << "HSI endpoint (" << m_timing_device << ") state: " << m_endpoint_state
+                  << ", infos received: " << m_device_infos_received_count;
+
+    if (m_device_ready && m_device_infos_received_count) {
       break;
     }
 
-    if (ms_since_conf > m_device_ready_timeout)
-    {
-      throw timinglibs::TimingEndpointNotReady(ERS_HERE,"HSI ("+m_timing_device+")", m_endpoint_state);
+    if (ms_since_conf > m_device_ready_timeout) {
+      throw timinglibs::TimingEndpointNotReady(ERS_HERE, "HSI (" + m_timing_device + ")", m_endpoint_state);
     }
-    
+
     TLOG_DEBUG(3) << "Waiting for HSI endpoint to become ready for (ms) " << ms_since_conf.count();
     std::this_thread::sleep_for(std::chrono::microseconds(250000));
   }
@@ -101,16 +99,11 @@ HSIController::do_start(const nlohmann::json& data)
   do_hsi_reset(data);
 
   auto start_params = data.get<rcif::cmd::StartParams>();
-  if (start_params.trigger_rate > 0)
-  {
-    TLOG() << get_name() << " Changing rate: trigger_rate "
-           << start_params.trigger_rate;  
+  if (start_params.trigger_rate > 0) {
+    TLOG() << get_name() << " Changing rate: trigger_rate " << start_params.trigger_rate;
     do_hsi_configure_trigger_rate_override(m_hsi_configuration, start_params.trigger_rate);
-  }
-  else
-  {
-    TLOG() << get_name() << " Changing rate: trigger_rate "
-           << m_hsi_configuration.trigger_rate;  
+  } else {
+    TLOG() << get_name() << " Changing rate: trigger_rate " << m_hsi_configuration.trigger_rate;
     do_hsi_configure(m_hsi_configuration);
   }
   do_hsi_start(m_hsi_configuration);
@@ -133,8 +126,7 @@ void
 HSIController::do_change_rate(const nlohmann::json& data)
 {
   auto change_rate_params = data.get<rcif::cmd::ChangeRateParams>();
-  TLOG() << get_name() << " Changing rate: trigger_rate "
-         << change_rate_params.trigger_rate;
+  TLOG() << get_name() << " Changing rate: trigger_rate " << change_rate_params.trigger_rate;
 
   do_hsi_configure_trigger_rate_override(m_hsi_configuration, change_rate_params.trigger_rate);
 }
@@ -161,8 +153,7 @@ HSIController::do_hsi_io_reset(const nlohmann::json& data)
 void
 HSIController::do_hsi_endpoint_enable(const nlohmann::json& data)
 {
-  timinglibs::timingcmd::TimingHwCmd hw_cmd =
-  construct_hsi_hw_cmd("endpoint_enable");
+  timinglibs::timingcmd::TimingHwCmd hw_cmd = construct_hsi_hw_cmd("endpoint_enable");
 
   timinglibs::timingcmd::TimingEndpointConfigureCmdPayload cmd_payload;
   cmd_payload.endpoint_id = 0;
@@ -179,8 +170,7 @@ HSIController::do_hsi_endpoint_enable(const nlohmann::json& data)
 void
 HSIController::do_hsi_endpoint_disable(const nlohmann::json&)
 {
-  timinglibs::timingcmd::TimingHwCmd hw_cmd =
-  construct_hsi_hw_cmd( "endpoint_disable");
+  timinglibs::timingcmd::TimingHwCmd hw_cmd = construct_hsi_hw_cmd("endpoint_disable");
   send_hw_cmd(std::move(hw_cmd));
   ++(m_sent_hw_command_counters.at(2).atomic);
 }
@@ -188,8 +178,7 @@ HSIController::do_hsi_endpoint_disable(const nlohmann::json&)
 void
 HSIController::do_hsi_endpoint_reset(const nlohmann::json& data)
 {
-  timinglibs::timingcmd::TimingHwCmd hw_cmd =
-  construct_hsi_hw_cmd( "endpoint_reset");
+  timinglibs::timingcmd::TimingHwCmd hw_cmd = construct_hsi_hw_cmd("endpoint_reset");
 
   timinglibs::timingcmd::TimingEndpointConfigureCmdPayload cmd_payload;
   cmd_payload.endpoint_id = 0;
@@ -204,8 +193,7 @@ HSIController::do_hsi_endpoint_reset(const nlohmann::json& data)
 void
 HSIController::do_hsi_reset(const nlohmann::json&)
 {
-  timinglibs::timingcmd::TimingHwCmd hw_cmd =
-  construct_hsi_hw_cmd( "hsi_reset");
+  timinglibs::timingcmd::TimingHwCmd hw_cmd = construct_hsi_hw_cmd("hsi_reset");
   send_hw_cmd(std::move(hw_cmd));
   ++(m_sent_hw_command_counters.at(4).atomic);
 }
@@ -213,12 +201,10 @@ HSIController::do_hsi_reset(const nlohmann::json&)
 void
 HSIController::do_hsi_configure(const nlohmann::json& data)
 {
-  timinglibs::timingcmd::TimingHwCmd hw_cmd =
-  construct_hsi_hw_cmd("hsi_configure");
+  timinglibs::timingcmd::TimingHwCmd hw_cmd = construct_hsi_hw_cmd("hsi_configure");
   hw_cmd.payload = data;
 
-  if (!hw_cmd.payload.contains("random_rate"))
-  {
+  if (!hw_cmd.payload.contains("random_rate")) {
     hw_cmd.payload["random_rate"] = m_hsi_configuration.trigger_rate;
   }
 
@@ -227,14 +213,14 @@ HSIController::do_hsi_configure(const nlohmann::json& data)
     return;
   }
 
-  TLOG() << get_name() << " Setting emulated event rate [Hz] to: "
-         << hw_cmd.payload["random_rate"];
+  TLOG() << get_name() << " Setting emulated event rate [Hz] to: " << hw_cmd.payload["random_rate"];
 
   send_hw_cmd(std::move(hw_cmd));
   ++(m_sent_hw_command_counters.at(5).atomic);
 }
 
-void HSIController::do_hsi_configure_trigger_rate_override(nlohmann::json data, double trigger_rate_override)
+void
+HSIController::do_hsi_configure_trigger_rate_override(nlohmann::json data, double trigger_rate_override)
 {
   data["random_rate"] = trigger_rate_override;
   do_hsi_configure(data);
@@ -243,8 +229,7 @@ void HSIController::do_hsi_configure_trigger_rate_override(nlohmann::json data, 
 void
 HSIController::do_hsi_start(const nlohmann::json&)
 {
-  timinglibs::timingcmd::TimingHwCmd hw_cmd =
-  construct_hsi_hw_cmd( "hsi_start");
+  timinglibs::timingcmd::TimingHwCmd hw_cmd = construct_hsi_hw_cmd("hsi_start");
   send_hw_cmd(std::move(hw_cmd));
   ++(m_sent_hw_command_counters.at(6).atomic);
 }
@@ -252,8 +237,7 @@ HSIController::do_hsi_start(const nlohmann::json&)
 void
 HSIController::do_hsi_stop(const nlohmann::json&)
 {
-  timinglibs::timingcmd::TimingHwCmd hw_cmd =
-  construct_hsi_hw_cmd( "hsi_stop");
+  timinglibs::timingcmd::TimingHwCmd hw_cmd = construct_hsi_hw_cmd("hsi_stop");
   send_hw_cmd(std::move(hw_cmd));
   ++(m_sent_hw_command_counters.at(7).atomic);
 }
@@ -261,8 +245,7 @@ HSIController::do_hsi_stop(const nlohmann::json&)
 void
 HSIController::do_hsi_print_status(const nlohmann::json&)
 {
-  timinglibs::timingcmd::TimingHwCmd hw_cmd =
-  construct_hsi_hw_cmd( "hsi_print_status");
+  timinglibs::timingcmd::TimingHwCmd hw_cmd = construct_hsi_hw_cmd("hsi_print_status");
   send_hw_cmd(std::move(hw_cmd));
   ++(m_sent_hw_command_counters.at(8).atomic);
 }
@@ -293,26 +276,23 @@ HSIController::process_device_info(nlohmann::json info)
 
   timing::timingendpointinfo::TimingEndpointInfo endpoint_info;
 
-  auto endpoint_data = info[opmonlib::JSONTags::children]["endpoint"][opmonlib::JSONTags::properties][endpoint_info.info_type][opmonlib::JSONTags::data];
+  auto endpoint_data = info[opmonlib::JSONTags::children]["endpoint"][opmonlib::JSONTags::properties]
+                           [endpoint_info.info_type][opmonlib::JSONTags::data];
 
   from_json(endpoint_data, endpoint_info);
 
   m_endpoint_state = endpoint_info.state;
-  
-  TLOG_DEBUG(3) << "HSI ept state: 0x" << std::hex << m_endpoint_state << std::dec << ", infos received: " << m_device_infos_received_count;
 
-  if (m_endpoint_state == 0x8)
-  {
-    if (!m_device_ready)
-    {
+  TLOG_DEBUG(3) << "HSI ept state: 0x" << std::hex << m_endpoint_state << std::dec
+                << ", infos received: " << m_device_infos_received_count;
+
+  if (m_endpoint_state == 0x8) {
+    if (!m_device_ready) {
       m_device_ready = true;
       TLOG_DEBUG(2) << "HSI endpoint became ready";
     }
-  }
-  else
-  {
-    if (m_device_ready)
-    {
+  } else {
+    if (m_device_ready) {
       m_device_ready = false;
       TLOG_DEBUG(2) << "HSI endpoint no longer ready";
     }

@@ -17,9 +17,9 @@
 #include "hsilibs/hsicontrollerinfo/InfoNljs.hpp"
 #include "hsilibs/hsicontrollerinfo/InfoStructs.hpp"
 
+#include "timinglibs/TimingController.hpp"
 #include "timinglibs/timingcmd/Nljs.hpp"
 #include "timinglibs/timingcmd/Structs.hpp"
-#include "timinglibs/TimingController.hpp"
 
 #include "appfwk/DAQModule.hpp"
 #include "ers/Issue.hpp"
@@ -82,8 +82,7 @@ private:
   void process_device_info(nlohmann::json info) override;
 
   std::atomic<uint> m_endpoint_state;
-  uint64_t m_clock_frequency;                     // NOLINT(build/unsigned)
-
+  uint64_t m_clock_frequency; // NOLINT(build/unsigned)
 };
 } // namespace hsilibs
 } // namespace dunedaq

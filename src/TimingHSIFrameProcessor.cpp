@@ -6,8 +6,8 @@
  * Licensing/copyright details are in the COPYING file that you should have
  * received with this code.
  */
-#include "hsilibs/Types.hpp"
 #include "TimingHSIFrameProcessor.hpp"
+#include "hsilibs/Types.hpp"
 
 #include <atomic>
 #include <functional>
@@ -17,7 +17,7 @@
 namespace dunedaq {
 namespace hsilibs {
 
-void 
+void
 TimingHSIFrameProcessor::conf(const nlohmann::json& args)
 {
   // m_tasklist.push_back( std::bind(&TimingHSIFrameProcessor::frame_error_check, this, std::placeholders::_1) );
@@ -27,7 +27,7 @@ TimingHSIFrameProcessor::conf(const nlohmann::json& args)
 /**
  * Pipeline Stage 2.: Check for errors
  * */
-void 
+void
 TimingHSIFrameProcessor::frame_error_check(frameptr /*fp*/)
 {
   // check error fields

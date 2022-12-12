@@ -1,5 +1,5 @@
 /**
- * @file HSIDataLinkHandler.hpp Module implementing 
+ * @file HSIDataLinkHandler.hpp Module implementing
  * DataLinkHandlerConcept for HSI.
  *
  * This is part of the DUNE DAQ , copyright 2020.
@@ -13,11 +13,11 @@
 #include "daqdataformats/Types.hpp"
 #include "readoutlibs/concepts/ReadoutConcept.hpp"
 
+#include <atomic>
 #include <chrono>
 #include <memory>
 #include <string>
 #include <vector>
-#include <atomic>
 
 namespace dunedaq {
 namespace hsilibs {

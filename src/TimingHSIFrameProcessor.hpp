@@ -35,11 +35,12 @@ public:
   // Constructor
   explicit TimingHSIFrameProcessor(std::unique_ptr<readoutlibs::FrameErrorRegistry>& error_registry)
     : TaskRawDataProcessorModel<hsilibs::TIMING_HSI_FRAME_STRUCT>(error_registry)
-  {}
+  {
+  }
 
   // Override config for pipeline setup
   void conf(const nlohmann::json& args) override;
-  
+
 protected:
   /**
    * Pipeline Stage 2.: Check for error
