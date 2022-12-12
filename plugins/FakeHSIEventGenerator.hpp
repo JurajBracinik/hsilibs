@@ -9,11 +9,11 @@
 
 #include "hsilibs/HSIEventSender.hpp"
 
+#include "timinglibs/TimestampEstimator.hpp"
 #include "hsilibs/fakehsieventgenerator/Nljs.hpp"
 #include "hsilibs/fakehsieventgenerator/Structs.hpp"
 #include "hsilibs/fakehsieventgeneratorinfo/InfoNljs.hpp"
 #include "hsilibs/fakehsieventgeneratorinfo/InfoStructs.hpp"
-#include "timinglibs/TimestampEstimator.hpp"
 
 #include "appfwk/DAQModule.hpp"
 #include "daqdataformats/Types.hpp"
@@ -82,10 +82,10 @@ private:
 
   uint32_t generate_signal_map(); // NOLINT(build/unsigned)
 
-  uint64_t m_clock_frequency; // NOLINT(build/unsigned)
+  uint64_t m_clock_frequency;                     // NOLINT(build/unsigned)
   std::atomic<float> m_trigger_rate;
   std::atomic<float> m_active_trigger_rate;
-  std::atomic<uint64_t> m_event_period; // NOLINT(build/unsigned)
+  std::atomic<uint64_t> m_event_period;           // NOLINT(build/unsigned)
   int64_t m_timestamp_offset;
 
   uint32_t m_hsi_device_id;            // NOLINT(build/unsigned)
