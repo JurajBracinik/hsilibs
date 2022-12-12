@@ -30,8 +30,8 @@ HSIEventSender::HSIEventSender(const std::string& name)
   , m_sent_counter(0)
   , m_failed_to_send_counter(0)
   , m_last_sent_timestamp(0)
-{
-}
+{}
+
 
 void
 HSIEventSender::init(const nlohmann::json& obj)
@@ -49,7 +49,7 @@ HSIEventSender::send_hsi_event(dfmessages::HSIEvent& event, const std::string& l
   bool was_successfully_sent = false;
   while (!was_successfully_sent) {
     try {
-      dfmessages::HSIEvent event_copy(event);
+        dfmessages::HSIEvent event_copy(event);
       get_iom_sender<dfmessages::HSIEvent>(location)->send(std::move(event_copy), m_queue_timeout);
       ++m_sent_counter;
       m_last_sent_timestamp.store(event.timestamp);
@@ -69,26 +69,36 @@ void
 HSIEventSender::send_raw_hsi_data(const std::array<uint32_t, 6>& raw_data)
 {
   TIMING_HSI_FRAME_STRUCT payload;
-  ::memcpy(&payload, &raw_data[0], sizeof(TIMING_HSI_FRAME_STRUCT));
-
-  TLOG_DEBUG(3) << get_name() << ": Sending TIMING_HSI_FRAME_STRUCT " << std::hex << "0x" << payload.frame.version
-                << ", 0x" << payload.frame.detector_id
-
-                << "; 0x" << payload.frame.timestamp_low << "; 0x" << payload.frame.timestamp_high << "; 0x"
-                << payload.frame.data << "; 0x" << payload.frame.trigger << "; 0x" << payload.frame.sequence
+  ::memcpy(&payload,
+           &raw_data[0],
+           sizeof(TIMING_HSI_FRAME_STRUCT));
+  
+  TLOG_DEBUG(3) << get_name() << ": Sending TIMING_HSI_FRAME_STRUCT "
+                << std::hex 
+                << "0x"   << payload.frame.version
+                << ", 0x"   << payload.frame.detector_id
+                
+                << "; 0x"   << payload.frame.timestamp_low
+                << "; 0x"   << payload.frame.timestamp_high
+                << "; 0x"   << payload.frame.data
+                << "; 0x"   << payload.frame.trigger
+                << "; 0x"   << payload.frame.sequence
                 << std::endl;
 
-  try {
-    // TODO deal with this
-    if (!m_raw_hsi_data_sender) {
+  try
+  {
+   // TODO deal with this
+   if (!m_raw_hsi_data_sender) {
       throw(QueueIsNullFatalError(ERS_HERE, get_name(), "HSIEventSender output"));
     }
     m_raw_hsi_data_sender->send(std::move(payload), m_queue_timeout);
-  } catch (const dunedaq::iomanager::TimeoutExpired& excpt) {
-    std::ostringstream oss_warn;
-    oss_warn << "push to output raw hsi data queue failed";
-    ers::error(dunedaq::iomanager::TimeoutExpired(ERS_HERE, get_name(), oss_warn.str(), m_queue_timeout.count()));
-    ++m_failed_to_send_counter;
+  }
+  catch (const dunedaq::iomanager::TimeoutExpired& excpt)
+  {
+      std::ostringstream oss_warn;
+      oss_warn << "push to output raw hsi data queue failed";
+      ers::error(dunedaq::iomanager::TimeoutExpired(ERS_HERE, get_name(), oss_warn.str(), m_queue_timeout.count()));
+      ++m_failed_to_send_counter;
   }
 }
 

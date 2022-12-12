@@ -35,9 +35,9 @@ FakeHSIEventGenerator::FakeHSIEventGenerator(const std::string& name)
   , m_random_generator()
   , m_uniform_distribution(0, UINT32_MAX)
   , m_clock_frequency(50e6)
-  , m_trigger_rate(1)        // Hz
+  , m_trigger_rate(1) // Hz
   , m_active_trigger_rate(1) // Hz
-  , m_event_period(1e6)      // us
+  , m_event_period(1e6) // us
   , m_timestamp_offset(0)
   , m_hsi_device_id(0)
   , m_signal_emulation_mode(0)
@@ -86,12 +86,16 @@ FakeHSIEventGenerator::do_configure(const nlohmann::json& obj)
   m_hsievent_send_connection = params.hsievent_connection_name;
 
   m_clock_frequency = params.clock_frequency;
-  if (params.trigger_rate > 0) {
+  if (params.trigger_rate>0)
+  {
     m_trigger_rate.store(params.trigger_rate);
     m_active_trigger_rate.store(m_trigger_rate.load());
-  } else {
+  }
+  else
+  {
     ers::fatal(InvalidTriggerRateValue(ERS_HERE, params.trigger_rate));
   }
+
 
   // time between HSI events [us]
   m_event_period.store(1.e6 / m_active_trigger_rate.load());
@@ -123,7 +127,7 @@ FakeHSIEventGenerator::do_start(const nlohmann::json& obj)
   m_timesync_receiver->add_callback(std::bind(&FakeHSIEventGenerator::dispatch_timesync, this, std::placeholders::_1));
 
   auto start_params = obj.get<rcif::cmd::StartParams>();
-  if (start_params.trigger_rate > 0) {
+  if (start_params.trigger_rate>0) {
     m_active_trigger_rate.store(start_params.trigger_rate);
 
     // time between HSI events [us]
@@ -174,7 +178,7 @@ FakeHSIEventGenerator::do_stop(const nlohmann::json& /*args*/)
   m_event_period.store(1.e6 / m_active_trigger_rate.load());
   TLOG() << get_name() << " Updating trigger rate, event period [us] to: " << m_active_trigger_rate.load() << ", "
          << m_event_period.load();
-
+  
   TLOG() << get_name() << " successfully stopped";
   TLOG_DEBUG(TLVL_ENTER_EXIT_METHODS) << get_name() << ": Exiting do_stop() method";
 }
@@ -218,8 +222,8 @@ FakeHSIEventGenerator::do_hsievent_work(std::atomic<bool>& running_flag)
 
   // Wait for there to be a valid timestsamp estimate before we start
   // TODO put in tome sort of timeout? Stoyan Trilov stoyan.trilov@cern.ch
-  if (m_timestamp_estimator.get() != nullptr && m_timestamp_estimator->wait_for_valid_timestamp(running_flag) ==
-                                                  timinglibs::TimestampEstimatorBase::kInterrupted) {
+  if (m_timestamp_estimator.get() != nullptr &&
+      m_timestamp_estimator->wait_for_valid_timestamp(running_flag) == timinglibs::TimestampEstimatorBase::kInterrupted) {
     ers::error(timinglibs::FailedToGetTimestampEstimate(ERS_HERE));
     return;
   }
@@ -237,11 +241,11 @@ FakeHSIEventGenerator::do_hsievent_work(std::atomic<bool>& running_flag)
   while (!break_flag) {
 
     // emulate some signals
-    uint32_t signal_map = generate_signal_map();           // NOLINT(build/unsigned)
+    uint32_t signal_map = generate_signal_map(); // NOLINT(build/unsigned)
     uint32_t trigger_map = signal_map & m_enabled_signals; // NOLINT(build/unsigned)
-
+  
     TLOG_DEBUG(3) << "masked gen. map:" << std::bitset<32>(trigger_map);
-
+  
     // if at least one active signal, send a HSIEvent
     if (trigger_map && m_timestamp_estimator.get() != nullptr) {
 
@@ -253,11 +257,10 @@ FakeHSIEventGenerator::do_hsievent_work(std::atomic<bool>& running_flag)
 
       m_last_generated_timestamp.store(ts);
 
-      dfmessages::HSIEvent event =
-        dfmessages::HSIEvent(m_hsi_device_id, trigger_map, ts, m_generated_counter, m_run_number);
+      dfmessages::HSIEvent event = dfmessages::HSIEvent(m_hsi_device_id, trigger_map, ts, m_generated_counter, m_run_number);
       send_hsi_event(event);
 
-      // Send raw HSI data to a DLH
+      // Send raw HSI data to a DLH 
       std::array<uint32_t, 6> hsi_struct;
       hsi_struct[0] = (0x1 << 6) | 0x1; // DAQHeader, frame version: 1, det id: 1
       hsi_struct[1] = ts;
@@ -266,23 +269,33 @@ FakeHSIEventGenerator::do_hsievent_work(std::atomic<bool>& running_flag)
       hsi_struct[4] = trigger_map;
       hsi_struct[5] = m_generated_counter;
 
-      TLOG_DEBUG(3) << get_name() << ": Formed TIMING_HSI_FRAME_STRUCT " << std::hex << "0x" << hsi_struct[0] << ", 0x"
-                    << hsi_struct[1] << ", 0x" << hsi_struct[2] << ", 0x" << hsi_struct[3] << ", 0x" << hsi_struct[4]
-                    << ", 0x" << hsi_struct[5] << "\n";
+      TLOG_DEBUG(3) << get_name() << ": Formed TIMING_HSI_FRAME_STRUCT "
+            << std::hex 
+            << "0x"   << hsi_struct[0]
+            << ", 0x" << hsi_struct[1]
+            << ", 0x" << hsi_struct[2]
+            << ", 0x" << hsi_struct[3]
+            << ", 0x" << hsi_struct[4]
+            << ", 0x" << hsi_struct[5]
+            << "\n";
 
       send_raw_hsi_data(hsi_struct);
+
     }
 
     // sleep for the configured event period, if trigger ticks are not 0, otherwise do not send anything
-    if (m_active_trigger_rate.load() > 0) {
+    if (m_active_trigger_rate.load() > 0)
+    {
       auto next_gen_time = prev_gen_time + std::chrono::microseconds(m_event_period.load());
 
       // check running_flag periodically
       auto flag_check_period = std::chrono::milliseconds(1);
       auto next_flag_check_time = prev_gen_time + flag_check_period;
 
-      while (next_gen_time > next_flag_check_time + flag_check_period) {
-        if (!running_flag.load()) {
+      while (next_gen_time > next_flag_check_time + flag_check_period)
+      {
+        if (!running_flag.load())
+        {
           TLOG_DEBUG(0) << "while waiting to generate fake hsi event, negative run gatherer flag detected.";
           break_flag = true;
           break;
@@ -290,7 +303,8 @@ FakeHSIEventGenerator::do_hsievent_work(std::atomic<bool>& running_flag)
         std::this_thread::sleep_until(next_flag_check_time);
         next_flag_check_time = next_flag_check_time + flag_check_period;
       }
-      if (break_flag == false) {
+      if (break_flag == false)
+      {
         std::this_thread::sleep_until(next_gen_time);
       }
 
