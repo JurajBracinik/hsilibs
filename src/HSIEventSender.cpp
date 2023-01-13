@@ -26,7 +26,6 @@ namespace hsilibs {
 
 HSIEventSender::HSIEventSender(const std::string& name)
   : dunedaq::appfwk::DAQModule(name)
-  , m_thread(std::bind(&HSIEventSender::do_hsievent_work, this, std::placeholders::_1))
   , m_queue_timeout(1)
   , m_sent_counter(0)
   , m_failed_to_send_counter(0)

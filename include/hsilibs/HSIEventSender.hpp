@@ -51,10 +51,6 @@ protected:
   virtual void do_stop(const nlohmann::json& obj) = 0;
   virtual void do_scrap(const nlohmann::json& obj) = 0;
 
-  // Threading
-  virtual void do_hsievent_work(std::atomic<bool>&) = 0;
-  dunedaq::utilities::WorkerThread m_thread;
-
   // Configuration
   std::string m_hsievent_send_connection;
   std::chrono::milliseconds m_queue_timeout;

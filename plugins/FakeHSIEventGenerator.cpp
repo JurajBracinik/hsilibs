@@ -31,6 +31,7 @@ namespace hsilibs {
 
 FakeHSIEventGenerator::FakeHSIEventGenerator(const std::string& name)
   : HSIEventSender(name)
+  , m_thread(std::bind(&FakeHSIEventGenerator::do_hsi_work, this, std::placeholders::_1))
   , m_timestamp_estimator(nullptr)
   , m_random_generator()
   , m_uniform_distribution(0, UINT32_MAX)
@@ -217,7 +218,7 @@ FakeHSIEventGenerator::generate_signal_map()
 }
 
 void
-FakeHSIEventGenerator::do_hsievent_work(std::atomic<bool>& running_flag)
+FakeHSIEventGenerator::do_hsi_work(std::atomic<bool>& running_flag)
 {
   TLOG_DEBUG(TLVL_ENTER_EXIT_METHODS) << get_name() << ": Entering generate_hsievents() method";
 

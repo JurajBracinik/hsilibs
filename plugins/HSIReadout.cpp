@@ -47,6 +47,7 @@ resolve_environment_variables(std::string& input_string)
 
 HSIReadout::HSIReadout(const std::string& name)
   : HSIEventSender(name)
+  , m_thread(std::bind(&HSIReadout::do_hsi_work, this, std::placeholders::_1))
   , m_readout_period(1000)
   , m_connections_file("")
   , m_connection_manager(nullptr)
@@ -152,7 +153,7 @@ HSIReadout::do_scrap(const nlohmann::json& /*args*/)
 }
 
 void
-HSIReadout::do_hsievent_work(std::atomic<bool>& running_flag)
+HSIReadout::do_hsi_work(std::atomic<bool>& running_flag)
 {
   TLOG_DEBUG(TLVL_ENTER_EXIT_METHODS) << get_name() << ": Entering do_hsievent_work() method";
 
