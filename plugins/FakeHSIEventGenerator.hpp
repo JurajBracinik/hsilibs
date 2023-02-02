@@ -62,12 +62,14 @@ private:
   void do_scrap(const nlohmann::json& obj) override;
   void do_change_rate(const nlohmann::json& obj);
 
+  std::shared_ptr<raw_sender_ct> m_raw_hsi_data_sender;
+  
+  void do_hsi_work(std::atomic<bool>&);
+  dunedaq::utilities::WorkerThread m_thread;
+
   void dispatch_timesync(dfmessages::TimeSync& message);
 
   std::shared_ptr<iomanager::ReceiverConcept<dfmessages::TimeSync>> m_timesync_receiver;
-
-  // Threading
-  void do_hsievent_work(std::atomic<bool>&) override;
 
   // Configuration
   std::string m_timesync_topic;
