@@ -62,6 +62,7 @@ HSIController::do_configure(const nlohmann::json& data)
 {
   m_hsi_configuration = data.get<hsicontroller::ConfParams>();
   m_timing_device = m_hsi_configuration.device;
+  m_timing_session_name = m_hsi_configuration.timing_session_name;
   
   TimingController::do_configure(data); // configure hw command connection
 
