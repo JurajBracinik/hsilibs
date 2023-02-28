@@ -72,7 +72,6 @@ private:
   std::shared_ptr<iomanager::ReceiverConcept<dfmessages::TimeSync>> m_timesync_receiver;
 
   // Configuration
-  std::string m_timesync_topic;
   std::atomic<daqdataformats::run_number_t> m_run_number;
 
   // Helper class for estimating DAQ time

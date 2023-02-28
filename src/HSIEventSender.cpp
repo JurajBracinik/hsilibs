@@ -13,7 +13,6 @@
 #include "appfwk/app/Nljs.hpp"
 #include "iomanager/IOManager.hpp"
 #include "logging/Logging.hpp"
-#include "serialization/Serialization.hpp"
 
 #include <chrono>
 #include <cstdlib>

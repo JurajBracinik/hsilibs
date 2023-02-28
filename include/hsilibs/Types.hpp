@@ -14,6 +14,7 @@
 #include "detdataformats/hsi/HSIFrame.hpp"
 #include "daqdataformats/FragmentHeader.hpp"
 #include "daqdataformats/SourceID.hpp"
+#include "serialization/Serialization.hpp"
 
 #include <algorithm> // For std::min
 #include <cassert>   // For assert()
@@ -79,6 +80,9 @@ static_assert(sizeof(struct HSI_FRAME_STRUCT) == HSI_FRAME_STRUCT_SIZE,
               "Check your assumptions on HSI_FRAME_STRUCT");
 
 } // namespace hsilibs
+
+DUNE_DAQ_TYPESTRING(hsilibs::TIMING_HSI_FRAME_STRUCT, "HSIFrame")
+
 } // namespace dunedaq
 
 #endif // HSILIBS_INCLUDE_HSILIBS_TYPES_HPP_
