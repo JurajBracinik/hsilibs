@@ -58,7 +58,7 @@ void
 FakeHSIEventGenerator::init(const nlohmann::json& init_data)
 {
   TLOG_DEBUG(TLVL_ENTER_EXIT_METHODS) << get_name() << ": Entering init() method";
-  m_raw_hsi_data_sender = get_iom_sender<HSI_FRAME_STRUCT>(appfwk::connection_inst(init_data, "output"));
+  m_raw_hsi_data_sender = get_iom_sender<HSI_FRAME_STRUCT>(appfwk::connection_uid(init_data, "output"));
   TLOG_DEBUG(TLVL_ENTER_EXIT_METHODS) << get_name() << ": Exiting init() method";
 }
 
