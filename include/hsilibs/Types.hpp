@@ -81,7 +81,7 @@ static_assert(sizeof(struct HSI_FRAME_STRUCT) == HSI_FRAME_STRUCT_SIZE,
 
 } // namespace hsilibs
 
-DUNE_DAQ_TYPESTRING(hsilibs::TIMING_HSI_FRAME_STRUCT, "HSIFrame")
+DUNE_DAQ_TYPESTRING(hsilibs::HSI_FRAME_STRUCT, "HSIFrame")
 
 } // namespace dunedaq
 
