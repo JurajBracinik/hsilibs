@@ -196,20 +196,21 @@ HSIReadout::do_hsi_work(std::atomic<bool>& running_flag)
       continue;
     }
     
+    constexpr size_t n_words_per_hsi_buffer_event = timing::HSINode::hsi_buffer_event_words_number;
     // one or more complete events
-    if (hsi_words.size() % timing::g_hsi_event_size == 0 && hsi_words.size() > 0)
+    if (hsi_words.size() % n_words_per_hsi_buffer_event == 0 && hsi_words.size() > 0)
     { 
-      uint n_hsi_events = hsi_words.size() / timing::g_hsi_event_size;
+      uint n_hsi_events = hsi_words.size() / n_words_per_hsi_buffer_event;
 
       TLOG_DEBUG(4) << get_name() << ": Have readout " << n_hsi_events << " HSIEvent(s) ";
 
       m_readout_counter.store(m_readout_counter.load() + n_hsi_events);
       for (uint i = 0; i < n_hsi_events; ++i)
       {
-        std::array<uint32_t, timing::g_hsi_event_size> raw_event;
+        std::array<uint32_t, n_words_per_hsi_buffer_event> raw_event;
 
-        auto event_start = hsi_words.begin() + (i * timing::g_hsi_event_size);
-        std::copy_n(event_start, timing::g_hsi_event_size, raw_event.begin());
+        auto event_start = hsi_words.begin() + (i * n_words_per_hsi_buffer_event);
+        std::copy_n(event_start, n_words_per_hsi_buffer_event, raw_event.begin());
 
         uint32_t header = raw_event.at(0);  // NOLINT(build/unsigned)
         uint32_t ts_low = raw_event.at(1);  // NOLINT(build/unsigned)
