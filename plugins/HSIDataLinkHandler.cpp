@@ -36,6 +36,7 @@ HSIDataLinkHandler::HSIDataLinkHandler(const std::string& name)
   , m_configured(false)
   , m_readout_impl(nullptr)
   , m_run_marker{ false }
+  , m_conf{ 0 }
 {
   register_command("conf", &HSIDataLinkHandler::do_conf);
   register_command("scrap", &HSIDataLinkHandler::do_scrap);
@@ -63,6 +64,32 @@ HSIDataLinkHandler::init(const data_t& args)
     TLOG() << get_name() << "Initialize HSIDataLinkHandler FAILED! ";
     throw readoutlibs::FailedReadoutInitialization(ERS_HERE, get_name(), args.dump()); // 4 json ident
   }
+  TLOG_DEBUG(TLVL_ENTER_EXIT_METHODS) << get_name() << ": Exiting init() method";
+}
+
+
+void
+HSIDataLinkHandler::init(const dunedaq::coredal::DaqModule* conf)
+{
+
+  TLOG_DEBUG(TLVL_ENTER_EXIT_METHODS) << get_name() << ": Entering init() method";
+
+  namespace rol = dunedaq::readoutlibs;
+  m_conf = conf;;
+
+  /// NEED TO WORK OUT AN OKS VERSION OF THE NEXT 2 STATEMENTS
+  m_readout_impl = std::make_unique<rol::ReadoutModel<
+                    hsilibs::HSI_FRAME_STRUCT,
+                    rol::DefaultRequestHandlerModel<hsilibs::HSI_FRAME_STRUCT, rol::BinarySearchQueueModel<hsilibs::HSI_FRAME_STRUCT>>,
+                    rol::BinarySearchQueueModel<hsilibs::HSI_FRAME_STRUCT>,
+                    hsilibs::HSIFrameProcessor>>(m_run_marker);
+  //m_readout_impl->init(conf);
+  if (m_readout_impl == nullptr)
+  {
+    TLOG() << get_name() << "Initialize HSIDataLinkHandler FAILED! ";
+    //throw readoutlibs::FailedReadoutInitialization(ERS_HERE, get_name(), args.dump()); // 4 json ident
+  }
+
   TLOG_DEBUG(TLVL_ENTER_EXIT_METHODS) << get_name() << ": Exiting init() method";
 }
 

@@ -15,6 +15,8 @@
 #include "hsilibs/fakehsieventgeneratorinfo/InfoNljs.hpp"
 #include "hsilibs/fakehsieventgeneratorinfo/InfoStructs.hpp"
 
+#include "hsilibs/FakeHSIEventGeneratorModule.hpp"
+
 #include "appfwk/DAQModule.hpp"
 #include "daqdataformats/Types.hpp"
 #include "dfmessages/TimeSync.hpp"
@@ -52,6 +54,7 @@ public:
   FakeHSIEventGenerator& operator=(FakeHSIEventGenerator&&) = delete; ///< FakeHSIEventGenerator is not move-assignable
 
   void init(const nlohmann::json& obj) override;
+  void init(const dunedaq::coredal::DaqModule* conf) override;
   void get_info(opmonlib::InfoCollector& ci, int level) override;
 
 private:
@@ -72,6 +75,7 @@ private:
   std::shared_ptr<iomanager::ReceiverConcept<dfmessages::TimeSync>> m_timesync_receiver;
 
   // Configuration
+  const dunedaq::coredal::FakeHSIEventGeneratorModule* m_conf;
   std::atomic<daqdataformats::run_number_t> m_run_number;
 
   // Helper class for estimating DAQ time
