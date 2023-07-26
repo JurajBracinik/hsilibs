@@ -77,7 +77,8 @@ daq_add_library(${dal_cpp_srcs} HSIEventSender.cpp HSIFrameProcessor.cpp LINK_LI
 
 ##############################################################################
 daq_add_plugin(HSIDataLinkHandler duneDAQModule LINK_LIBRARIES hsilibs readoutlibs::readoutlibs ${BOOST_LIBS})
-daq_add_plugin(FakeHSIEventGenerator duneDAQModule LINK_LIBRARIES hsilibs timinglibs::timinglibs timing::timing)
+### daq_add_plugin(FakeHSIEventGenerator duneDAQModule LINK_LIBRARIES hsilibs timinglibs::timinglibs timing::timing)
+daq_add_plugin(FakeHSIEventGenerator duneDAQModule LINK_LIBRARIES appfwk::appfwk hsilibs hsilibs_oks coremanager timinglibs::timinglibs timing::timing)
 daq_add_plugin(HSIReadout duneDAQModule LINK_LIBRARIES timing::timing timinglibs::timinglibs uhal::uhal pugixml::pugixml hsilibs)
 daq_add_plugin(HSIController duneDAQModule LINK_LIBRARIES hsilibs timing::timing timinglibs::timinglibs)
 

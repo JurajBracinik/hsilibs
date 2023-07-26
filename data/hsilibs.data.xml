@@ -172,11 +172,18 @@
  <attr name="queue_type" type="enum" val="kFollySPSCQueue"/>
 </obj>
 
+<obj class="PhysicalHost" id="localhost">
+ <rel name="contains">
+  <ref class="ProcessingResource" id="numa0-localhost"/>
+  <ref class="ProcessingResource" id="numa1-localhost"/>
+ </rel>
+</obj>
+
 <obj class="VirtualHost" id="hsi-host">
  <rel name="uses">
   <ref class="ProcessingResource" id="hsi-localhost"/>
  </rel>
- <rel name="runs_on" class="PhysicalHost" id="localHost"/>
+ <rel name="runs_on" class="PhysicalHost" id="localhost"/>
 </obj>
 
 </oks-data>

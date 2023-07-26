@@ -67,6 +67,7 @@ FakeHSIEventGenerator::init(const nlohmann::json& init_data)
 void
 FakeHSIEventGenerator::init(const dunedaq::coredal::DaqModule* conf)
 {
+  std::cout << "Juraj : in OKS versioon of  FakeHSIEventGenerator::init " << std::endl;
   m_conf = conf->cast<dunedaq::coredal::FakeHSIEventGeneratorModule>();
   TLOG_DEBUG(TLVL_ENTER_EXIT_METHODS) << get_name() << ": Entering init() method";
   // Overloaded call to HSIEventSender::init 
